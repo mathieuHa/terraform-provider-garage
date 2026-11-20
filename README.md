@@ -88,7 +88,7 @@ make lint
 
 ## Releasing
 
-Pushing a `v*` tag runs GoReleaser, which builds, signs and publishes the release. The repository needs the `GPG_PRIVATE_KEY` and `PASSPHRASE` secrets. The Terraform Registry picks up releases once the provider is registered there. The OpenTofu Registry needs a one-time submission to [opentofu/registry](https://github.com/opentofu/registry), with the public signing key.
+Pushing a `v*` tag runs GoReleaser, which builds, signs and publishes the release. The repository needs the `GPG_PRIVATE_KEY` and `PASSPHRASE` secrets. Releases are signed with the key in [`signing-key.asc`](signing-key.asc) (RSA 4096, fingerprint `9C0F 4550 B465 8640 4262  B87E 051F D91A 3514 DDDA`). The Terraform Registry picks up releases once the provider is registered there. The OpenTofu Registry needs a one-time submission to [opentofu/registry](https://github.com/opentofu/registry), with the public signing key.
 
 ## License
 
