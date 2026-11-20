@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build, vet, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go build -v ./...
+      - run: go vet ./...
+      - run: go test -race -count=1 ./...
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: golangci/golangci-lint-action@1481404843c368bc19ca9406f87d6e0fc97bdcfd # v7.0.0
+        with:
+          version: latest
+
+  docs:
+    name: Generated docs are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_wrapper: false
+      - run: scripts/docs.sh
+      - run: git diff --exit-code docs/
+
+  acceptance:
+    name: Acceptance (Garage ${{ matrix.garage }}, ${{ matrix.cli }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        garage: [v2.3.0, v2.5.0]
+        cli: [opentofu, terraform]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - if: matrix.cli == 'opentofu'
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_wrapper: false
+      - if: matrix.cli == 'terraform'
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_wrapper: false
+      - name: Select the CLI
+        run: |
+          if [ "${{ matrix.cli }}" = opentofu ]; then
+            echo "TF_ACC_TERRAFORM_PATH=$(command -v tofu)" >> "$GITHUB_ENV"
+            echo "TF_ACC_PROVIDER_HOST=registry.opentofu.org" >> "$GITHUB_ENV"
+          else
+            echo "TF_ACC_TERRAFORM_PATH=$(command -v terraform)" >> "$GITHUB_ENV"
+          fi
+      - name: Start Garage
+        env:
+          GARAGE_IMAGE: dxflrs/garage:${{ matrix.garage }}
+        run: |
+          set -o pipefail
+          scripts/testacc-garage.sh start | sed 's/^export //' >> "$GITHUB_ENV"
+      - name: Acceptance tests
+        env:
+          TF_ACC: "1"
+          TF_ACC_PROVIDER_NAMESPACE: hashicorp
+        run: go test -count=1 -v -timeout 20m -run '^TestAcc' ./internal/provider/
+      - name: Garage logs
+        if: failure()
+        run: docker logs garage-provider-acctest || true

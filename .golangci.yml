@@ -1,0 +1,16 @@
+version: "2"
+linters:
+  enable:
+    - bodyclose
+    - copyloopvar
+    - errorlint
+    - gocritic
+    - misspell
+    - nilerr
+    - unconvert
+    - unparam
+    - usestdlibvars
+formatters:
+  enable:
+    - gofmt
+    - goimports

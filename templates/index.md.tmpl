@@ -1,0 +1,25 @@
+---
+page_title: "Provider: Garage"
+description: |-
+  Manage Garage buckets, keys, permissions, admin tokens and the cluster layout through the admin API v2.
+---
+
+# Garage Provider
+
+{{ .Description }}
+
+It needs Garage 2.3.0 or later, and works with OpenTofu and Terraform.
+
+## Example Usage
+
+{{ tffile "examples/provider/provider.tf" }}
+
+## What Garage does not have
+
+Garage has no IAM: there are no users, policies, conditions or prefix-scoped grants. An access key gets `read`, `write` and `owner` on whole buckets with `garage_bucket_permission`. Public read access goes through the website endpoint (`garage_bucket.website`). Garage has no bucket policies, ACLs, versioning or object lock either.
+
+## Operations not covered
+
+Imperative admin endpoints are not exposed as resources: connecting nodes, skipping dead nodes, repairs, metadata snapshots, workers, block operations, purging incomplete uploads and inspecting objects. Use the `garage` CLI or the admin API for those.
+
+{{ .SchemaMarkdown | trimspace }}
