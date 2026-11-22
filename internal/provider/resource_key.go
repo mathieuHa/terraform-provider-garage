@@ -51,7 +51,7 @@ func (r *keyResource) Configure(_ context.Context, req resource.ConfigureRequest
 func (r *keyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "An S3 access key. Grant it access to buckets with `garage_bucket_permission`.\n\n" +
-			"Set `id` and `secret_access_key` to import credentials that already exist elsewhere, for example from another S3 service. " +
+			"Set `id` and `secret_access_key` to import credentials that already exist, for example from another Garage cluster. They must use the Garage format: `GK` and 24 hexadecimal characters for the ID, 64 hexadecimal characters for the secret. " +
 			"Garage never accepts an ID again once its key is deleted, so replacing an imported key needs new credentials.\n\n" +
 			"The secret is stored in the state.",
 		Attributes: map[string]schema.Attribute{

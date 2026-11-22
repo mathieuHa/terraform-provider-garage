@@ -1,7 +1,7 @@
 VERSION := $(shell git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo dev)
 TOFU ?= $(shell command -v tofu 2>/dev/null)
 
-.PHONY: build install test testacc testacc-up testacc-down docs fmt vet lint ci clean
+.PHONY: build install test testacc testacc-up testacc-down docs site site-serve fmt vet lint ci clean
 
 build:
 	go build -o terraform-provider-garage
@@ -30,6 +30,15 @@ testacc: testacc-up
 
 docs:
 	scripts/docs.sh
+
+SITE_RUN = docker run --rm -u "$$(id -u):$$(id -g)" -e HOME=/tmp -v "$(CURDIR):/src" -w /src
+SITE_CMD = pip install -q --user -r site/requirements.txt && export PATH=/tmp/.local/bin:$$PATH && python site/gen.py
+
+site:
+	$(SITE_RUN) python:3.13-slim sh -c '$(SITE_CMD) && zensical build --clean --strict -f site/build/zensical.toml'
+
+site-serve:
+	$(SITE_RUN) -p 127.0.0.1:8000:8000 python:3.13-slim sh -c '$(SITE_CMD) && zensical serve -a 0.0.0.0:8000 -f site/build/zensical.toml'
 
 fmt:
 	gofmt -w .

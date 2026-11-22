@@ -8,10 +8,10 @@ resource "garage_key" "ci" {
   expiration          = "2027-01-01T00:00:00Z"
 }
 
-resource "garage_key" "migrated" {
-  name              = "migrated-from-minio"
+resource "garage_key" "restored" {
+  name              = "restored-from-old-cluster"
   id                = "GK31c2f218a2e44f485b94239e"
-  secret_access_key = var.migrated_secret
+  secret_access_key = var.restored_secret
 }
 
 resource "vault_kv_secret_v2" "app" {
