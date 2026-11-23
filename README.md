@@ -83,6 +83,7 @@ Imperative admin operations are not exposed: connecting nodes, skipping dead nod
 make build       # build the provider
 make test        # unit tests
 make testacc     # start a throwaway Garage in Docker and run the acceptance tests with OpenTofu
+make test-guides # apply, replan and destroy every example in examples/guides/ against that Garage
 make testacc-down
 make docs        # regenerate docs/ from the schema, templates/ and examples/
 make site        # build the documentation site into site/build/public (Docker)
@@ -90,9 +91,9 @@ make site-serve  # preview the site on http://127.0.0.1:8000
 make lint
 ```
 
-The documentation site is built by `site/gen.py` with [Zensical](https://zensical.org/), from `docs/`, `examples/` and the pages in `site/content/`. It is published to GitHub Pages on every push to `main`. The guide examples in `examples/guides/` are complete configurations: apply them against the test Garage before changing them.
+The documentation site is built by `site/gen.py` with [Zensical](https://zensical.org/), from `docs/`, `examples/` and the pages in `site/content/`. It is published to GitHub Pages on every push to `main`. The guide examples in `examples/guides/` are complete configurations, tested by `make test-guides` and in CI.
 
-`make testacc` uses `scripts/testacc-garage.sh`, which starts `dxflrs/garage:v2.5.0` on ports 13900 and 13903. Set `GARAGE_IMAGE` to test another version. To use a local build, run `make install` and follow the `dev_overrides` instructions it prints.
+`make testacc` uses `scripts/testacc-garage.sh`, which starts `dxflrs/garage:v2.5.0` with its S3 API on port 13900, its web endpoint on 13902 and its admin API on 13903. Besides the admin API, the `TestAccS3_*` tests use a real S3 client to check that permissions, quotas, website hosting and CORS rules take effect. Set `GARAGE_IMAGE` to test another version. To use a local build, run `make install` and follow the `dev_overrides` instructions it prints.
 
 ## Releasing
 

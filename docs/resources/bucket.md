@@ -92,7 +92,7 @@ Optional:
 - `allowed_headers` (List of String) Request headers allowed in a preflight request.
 - `expose_headers` (List of String) Response headers that browsers can read.
 - `id` (String) Identifier of the rule.
-- `max_age_seconds` (Number) How long browsers can cache a preflight response.
+- `max_age_seconds` (Number) How long browsers can cache a preflight response. Garage stores the value, but as of Garage 2.5 does not send it in preflight responses.
 
 
 <a id="nestedatt--lifecycle_rules"></a>

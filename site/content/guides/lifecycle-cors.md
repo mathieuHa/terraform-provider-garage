@@ -19,7 +19,9 @@ Garage runs the rules once a day.
 
 ## CORS rules
 
-A browser sends a preflight request before a cross-origin `PUT`. The rule above answers it for `https://app.example.com`, allows every request header, lets the application read the `ETag` of an upload, and lets the browser cache the answer for an hour.
+A browser sends a preflight request before a cross-origin `PUT`. The rule above answers it for `https://app.example.com`, allows every request header, and lets the application read the `ETag` of an upload. Preflight requests from other origins, or for other methods, are refused.
+
+`max_age_seconds` is stored, but as of Garage 2.5 Garage does not send it in preflight responses, so browsers repeat the preflight request each time.
 
 ## Who manages the rules
 

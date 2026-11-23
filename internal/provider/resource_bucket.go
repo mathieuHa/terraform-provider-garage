@@ -195,7 +195,7 @@ func corsRulesSchema() schema.ListNestedAttribute {
 				},
 				"max_age_seconds": schema.Int64Attribute{
 					Optional:            true,
-					MarkdownDescription: "How long browsers can cache a preflight response.",
+					MarkdownDescription: "How long browsers can cache a preflight response. Garage stores the value, but as of Garage 2.5 does not send it in preflight responses.",
 					Validators:          []validator.Int64{int64validator.AtLeast(0)},
 				},
 			},

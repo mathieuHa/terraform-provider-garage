@@ -5,6 +5,7 @@ name="${GARAGE_TEST_CONTAINER:-garage-provider-acctest}"
 image="${GARAGE_IMAGE:-dxflrs/garage:v2.5.0}"
 s3_port="${GARAGE_TEST_S3_PORT:-13900}"
 admin_port="${GARAGE_TEST_ADMIN_PORT:-13903}"
+web_port="${GARAGE_TEST_WEB_PORT:-13902}"
 token="${GARAGE_TEST_TOKEN:-acceptance-test-token}"
 workdir="${TMPDIR:-/tmp}/${name}"
 
@@ -40,7 +41,7 @@ admin_token = "${token}"
 TOML
 
   docker run -d --name "$name" \
-    -p "127.0.0.1:${s3_port}:3900" -p "127.0.0.1:${admin_port}:3903" \
+    -p "127.0.0.1:${s3_port}:3900" -p "127.0.0.1:${web_port}:3902" -p "127.0.0.1:${admin_port}:3903" \
     -v "$workdir/garage.toml:/etc/garage.toml:ro" \
     "$image" /garage server >/dev/null
 
@@ -62,6 +63,8 @@ TOML
   echo "export GARAGE_ENDPOINT=http://127.0.0.1:${admin_port}"
   echo "export GARAGE_TOKEN=${token}"
   echo "export GARAGE_TEST_NODE_ID=${node_id}"
+  echo "export GARAGE_TEST_S3_ENDPOINT=http://127.0.0.1:${s3_port}"
+  echo "export GARAGE_TEST_WEB_ENDPOINT=http://127.0.0.1:${web_port}"
 }
 
 case "${1:-start}" in

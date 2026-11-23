@@ -95,3 +95,36 @@ jobs:
       - name: Garage logs
         if: failure()
         run: docker logs garage-provider-acctest || true
+
+  guides:
+    name: Guide examples (${{ matrix.cli }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cli: [opentofu, terraform]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - if: matrix.cli == 'opentofu'
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_wrapper: false
+      - if: matrix.cli == 'terraform'
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_wrapper: false
+      - name: Start Garage
+        run: |
+          set -o pipefail
+          scripts/testacc-garage.sh start | sed 's/^export //' >> "$GITHUB_ENV"
+      - name: Apply, replan and destroy every guide example
+        env:
+          TF_CLI: ${{ matrix.cli == 'opentofu' && 'tofu' || 'terraform' }}
+        run: scripts/test-guides.sh
+      - name: Garage logs
+        if: failure()
+        run: docker logs garage-provider-acctest || true

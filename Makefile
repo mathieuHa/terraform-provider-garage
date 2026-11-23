@@ -1,7 +1,7 @@
 VERSION := $(shell git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo dev)
 TOFU ?= $(shell command -v tofu 2>/dev/null)
 
-.PHONY: build install test testacc testacc-up testacc-down docs site site-serve fmt vet lint ci clean
+.PHONY: build install test testacc test-guides testacc-up testacc-down docs site site-serve fmt vet lint ci clean
 
 build:
 	go build -o terraform-provider-garage
@@ -27,6 +27,9 @@ testacc: testacc-up
 	. ./.testacc.env && \
 	TF_ACC=1 TF_ACC_TERRAFORM_PATH=$(TOFU) TF_ACC_PROVIDER_HOST=registry.opentofu.org TF_ACC_PROVIDER_NAMESPACE=hashicorp \
 	go test -count=1 -v -timeout 20m -run '^TestAcc' ./internal/provider/
+
+test-guides: testacc-up
+	. ./.testacc.env && TF_CLI=$(notdir $(TOFU)) scripts/test-guides.sh
 
 docs:
 	scripts/docs.sh
